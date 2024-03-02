@@ -1,5 +1,6 @@
-import 'package:cuckoosearchtsp/circle.dart';
+import 'package:cuckoosearchtsp/circle_painter.dart';
 import 'package:cuckoosearchtsp/city.dart';
+import 'package:cuckoosearchtsp/line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinbox/flutter_spinbox.dart';
 
@@ -31,6 +32,147 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  List<Widget> lines = [];
+  List<List<double>> connectedCities = [];
+  List<List<Offset>> cityOffsets = [];
+  List<Map<String, dynamic>> cities = [
+    {'name': 'Tangier', 'side': 'Left', 'leftPadding': 430.0, 'topPadding': 3},
+    {
+      'name': 'Tetouan',
+      'side': 'Right',
+      'leftPadding': 515.0,
+      'topPadding': 15
+    },
+    {'name': 'Nador', 'side': 'Right', 'leftPadding': 605.0, 'topPadding': 25},
+    {'name': 'Oujda', 'side': 'Left', 'leftPadding': 605.0, 'topPadding': 60},
+    {'name': 'Kenitra', 'side': 'Left', 'leftPadding': 380.0, 'topPadding': 90},
+    {'name': 'Sale', 'side': 'Right', 'leftPadding': 415.0, 'topPadding': 105},
+    {'name': 'Rabat', 'side': 'Left', 'leftPadding': 345.0, 'topPadding': 110},
+    {'name': 'Fez', 'side': 'Left', 'leftPadding': 500.0, 'topPadding': 110},
+    {'name': 'Taza', 'side': 'Right', 'leftPadding': 570.0, 'topPadding': 90},
+    {'name': 'Meknes', 'side': 'Left', 'leftPadding': 440.0, 'topPadding': 125},
+    {'name': 'Temara', 'side': 'Left', 'leftPadding': 325.0, 'topPadding': 125},
+    {
+      'name': 'Mohammedia',
+      'side': 'Left',
+      'leftPadding': 265.0,
+      'topPadding': 140
+    },
+    {
+      'name': 'Casablanca',
+      'side': 'Left',
+      'leftPadding': 270.0,
+      'topPadding': 165
+    },
+    {
+      'name': 'El Jadida',
+      'side': 'Left',
+      'leftPadding': 270.0,
+      'topPadding': 190
+    },
+    {'name': 'Settat', 'side': 'Left', 'leftPadding': 360.0, 'topPadding': 195},
+    {
+      'name': 'Khouribga',
+      'side': 'Right',
+      'leftPadding': 440.0,
+      'topPadding': 200
+    },
+    {
+      'name': 'Marrakesh',
+      'side': 'Right',
+      'leftPadding': 390.0,
+      'topPadding': 250
+    },
+    {'name': 'Agadir', 'side': 'Left', 'leftPadding': 280.0, 'topPadding': 280},
+    {
+      'name': 'Guelmim',
+      'side': 'Left',
+      'leftPadding': 240.0,
+      'topPadding': 350
+    },
+    {
+      'name': 'Laayoune',
+      'side': 'Right',
+      'leftPadding': 170.0,
+      'topPadding': 410
+    },
+  ];
+
+  List<Widget> cityWidgets = [];
+
+  @override
+  void initState() {
+    for (var city in cities) {
+      cityWidgets.add(
+        Padding(
+          padding: EdgeInsets.only(
+              left: city['leftPadding'], top: city['topPadding']),
+          child: City(
+            name: city['name'],
+            side: city['side'],
+            getXY: (x, y) {
+              if (!(connectedCities.length == 1 &&
+                  connectedCities[0][0] == x &&
+                  connectedCities[0][1] == y)) {
+                connectedCities.add([x, y]);
+                if (connectedCities.length == 2) {
+                  bool edgeExists = false;
+                  for (List<Offset> offsets in cityOffsets) {
+                    if (offsets[0] ==
+                            Offset(
+                              connectedCities[0][0],
+                              connectedCities[0][1],
+                            ) &&
+                        offsets[1] ==
+                            Offset(
+                              connectedCities[1][0],
+                              connectedCities[1][1],
+                            )) {
+                      edgeExists = true;
+                    }
+                  }
+                  if (!edgeExists) {
+                    setState(() {
+                      lines.add(CustomPaint(
+                        size: Size(300, 300),
+                        painter: LinePainter(
+                          circle1Center: Offset(
+                            connectedCities[0][0],
+                            connectedCities[0][1],
+                          ),
+                          circle2Center: Offset(
+                            connectedCities[1][0],
+                            connectedCities[1][1],
+                          ),
+                        ),
+                      ));
+                    });
+                    cityOffsets.add(
+                      [
+                        Offset(
+                          connectedCities[0][0],
+                          connectedCities[0][1],
+                        ),
+                        Offset(
+                          connectedCities[1][0],
+                          connectedCities[1][1],
+                        )
+                      ],
+                    );
+                    connectedCities.clear();
+                  } else {
+                    connectedCities.removeLast();
+                  }
+                }
+              }
+            },
+          ),
+        ),
+      );
+    }
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -127,146 +269,12 @@ class _MyHomePageState extends State<MyHomePage> {
                                 fit: BoxFit.cover,
                               ),
                             ),
-                            const Padding(
-                              padding: EdgeInsets.only(
-                                left: 430.0,
-                                top: 3,
-                              ),
-                              child: City(name: 'Tangier', side: 'Left'),
+                            Stack(
+                              children: cityWidgets,
                             ),
-                            const Padding(
-                              padding: EdgeInsets.only(
-                                left: 515.0,
-                                top: 15,
-                              ),
-                              child: City(name: 'Tetouan', side: 'Right'),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.only(
-                                left: 605.0,
-                                top: 25,
-                              ),
-                              child: City(name: 'Nador', side: 'Right'),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.only(
-                                left: 605.0,
-                                top: 60,
-                              ),
-                              child: City(name: 'Oujda', side: 'Left'),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.only(
-                                left: 380.0,
-                                top: 90,
-                              ),
-                              child: City(name: 'Kenitra', side: 'Left'),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.only(
-                                left: 415.0,
-                                top: 105,
-                              ),
-                              child: City(name: 'Sale', side: 'Right'),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.only(
-                                left: 345.0,
-                                top: 110,
-                              ),
-                              child: City(name: 'Rabat', side: 'Left'),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.only(
-                                left: 500.0,
-                                top: 110,
-                              ),
-                              child: City(name: 'Fez', side: 'Left'),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.only(
-                                left: 570.0,
-                                top: 90,
-                              ),
-                              child: City(name: 'Taza', side: 'Right'),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.only(
-                                left: 440.0,
-                                top: 125,
-                              ),
-                              child: City(name: 'Meknes', side: 'Left'),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.only(
-                                left: 325.0,
-                                top: 125,
-                              ),
-                              child: City(name: 'Temara', side: 'Left'),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.only(
-                                left: 265.0,
-                                top: 140,
-                              ),
-                              child: City(name: 'Mohammedia', side: 'Left'),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.only(
-                                left: 270.0,
-                                top: 165,
-                              ),
-                              child: City(name: 'Casablanca', side: 'Left'),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.only(
-                                left: 270.0,
-                                top: 190,
-                              ),
-                              child: City(name: 'El Jadida', side: 'Left'),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.only(
-                                left: 360.0,
-                                top: 195,
-                              ),
-                              child: City(name: 'Settat', side: 'Left'),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.only(
-                                left: 440.0,
-                                top: 200,
-                              ),
-                              child: City(name: 'Khouribga', side: 'Right'),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.only(
-                                left: 390.0,
-                                top: 250,
-                              ),
-                              child: City(name: 'Marrakesh', side: 'Right'),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.only(
-                                left: 280.0,
-                                top: 280,
-                              ),
-                              child: City(name: 'Agadir', side: 'Left'),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.only(
-                                left: 240.0,
-                                top: 350,
-                              ),
-                              child: City(name: 'Guelmim', side: 'Left'),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.only(
-                                left: 170.0,
-                                top: 410,
-                              ),
-                              child: City(name: 'Laayoune', side: 'Right'),
-                            ),
+                            Stack(
+                              children: lines,
+                            )
                           ],
                         ),
                       ),
