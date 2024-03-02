@@ -10,17 +10,19 @@ class City extends StatefulWidget {
     required this.name,
     required this.side,
     required this.getXY,
+    required this.resetColors,
   });
   final String name;
   final String side;
   final Function(double, double) getXY;
+  final Function resetColors;
 
   @override
   State<City> createState() => _CityState();
 }
 
 class _CityState extends State<City> {
-  Color _color = Colors.blue;
+  late Color _color = Colors.blue;
   bool _cityDeparture = false;
   bool _routeMode = false;
   late double xPosition;
@@ -70,6 +72,16 @@ class _CityState extends State<City> {
               }
             } else {
               widget.getXY(xPosition, yPosition);
+              if (CityRoute.clickedCity != widget.name &&
+                  !CityRoute.clickedCity.isEmpty) {
+                CityRoute.clickedCity = "";
+                widget.resetColors();
+              } else if (CityRoute.clickedCity.isEmpty) {
+                CityRoute.clickedCity = widget.name;
+                setState(() {
+                  _color = Colors.red;
+                });
+              }
             }
           },
           child: Stack(

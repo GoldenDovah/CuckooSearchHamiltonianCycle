@@ -102,6 +102,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
+    createCityWidgets();
+    super.initState();
+  }
+
+  void createCityWidgets() {
     for (var city in cities) {
       cityWidgets.add(
         Padding(
@@ -159,18 +164,24 @@ class _MyHomePageState extends State<MyHomePage> {
                         )
                       ],
                     );
-                    connectedCities.clear();
-                  } else {
-                    connectedCities.removeLast();
                   }
+                  connectedCities.clear();
                 }
               }
+            },
+            resetColors: () async {
+              setState(() {
+                cityWidgets.clear();
+              });
+              await Future.delayed(Duration(microseconds: 1));
+              setState(() {
+                createCityWidgets();
+              });
             },
           ),
         ),
       );
     }
-    super.initState();
   }
 
   @override
