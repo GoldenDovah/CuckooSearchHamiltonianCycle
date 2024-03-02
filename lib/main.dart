@@ -1,4 +1,5 @@
 import 'package:cuckoosearchtsp/circle.dart';
+import 'package:cuckoosearchtsp/city.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinbox/flutter_spinbox.dart';
 
@@ -36,7 +37,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: Column(
           children: [
-            Text(
+            const Text(
               "Hamiltonian Cycle with Cuckoo Search",
               style: TextStyle(fontSize: 26),
             ),
@@ -54,7 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: ListTile(
-                                title: Text('Population Size'),
+                                title: const Text('Population Size'),
                                 trailing: SizedBox(
                                   width: MediaQuery.of(context).size.width / 5,
                                   child: SpinBox(
@@ -69,7 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: ListTile(
-                                title: Text('Max Iterations'),
+                                title: const Text('Max Iterations'),
                                 trailing: SizedBox(
                                   width: MediaQuery.of(context).size.width / 5,
                                   child: SpinBox(
@@ -84,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: ListTile(
-                                title: Text('Replacement Probability'),
+                                title: const Text('Replacement Probability'),
                                 trailing: SizedBox(
                                   width: MediaQuery.of(context).size.width / 5,
                                   child: SpinBox(
@@ -113,7 +114,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               color: Colors.grey.withOpacity(0.5),
                               spreadRadius: 5,
                               blurRadius: 7,
-                              offset: Offset(0, 3),
+                              offset: const Offset(0, 3),
                             ),
                           ],
                         ),
@@ -126,15 +127,145 @@ class _MyHomePageState extends State<MyHomePage> {
                                 fit: BoxFit.cover,
                               ),
                             ),
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                left: 490.0,
-                                top: 10,
+                            const Padding(
+                              padding: EdgeInsets.only(
+                                left: 430.0,
+                                top: 3,
                               ),
-                              child: CustomPaint(
-                                size: Size(15, 15),
-                                painter: CirclePainterCustom(),
+                              child: City(name: 'Tangier', side: 'Left'),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(
+                                left: 515.0,
+                                top: 15,
                               ),
+                              child: City(name: 'Tetouan', side: 'Right'),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(
+                                left: 605.0,
+                                top: 25,
+                              ),
+                              child: City(name: 'Nador', side: 'Right'),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(
+                                left: 605.0,
+                                top: 60,
+                              ),
+                              child: City(name: 'Oujda', side: 'Left'),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(
+                                left: 380.0,
+                                top: 90,
+                              ),
+                              child: City(name: 'Kenitra', side: 'Left'),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(
+                                left: 415.0,
+                                top: 105,
+                              ),
+                              child: City(name: 'Sale', side: 'Right'),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(
+                                left: 345.0,
+                                top: 110,
+                              ),
+                              child: City(name: 'Rabat', side: 'Left'),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(
+                                left: 500.0,
+                                top: 110,
+                              ),
+                              child: City(name: 'Fez', side: 'Left'),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(
+                                left: 570.0,
+                                top: 90,
+                              ),
+                              child: City(name: 'Taza', side: 'Right'),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(
+                                left: 440.0,
+                                top: 125,
+                              ),
+                              child: City(name: 'Meknes', side: 'Left'),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(
+                                left: 325.0,
+                                top: 125,
+                              ),
+                              child: City(name: 'Temara', side: 'Left'),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(
+                                left: 265.0,
+                                top: 140,
+                              ),
+                              child: City(name: 'Mohammedia', side: 'Left'),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(
+                                left: 270.0,
+                                top: 165,
+                              ),
+                              child: City(name: 'Casablanca', side: 'Left'),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(
+                                left: 270.0,
+                                top: 190,
+                              ),
+                              child: City(name: 'El Jadida', side: 'Left'),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(
+                                left: 360.0,
+                                top: 195,
+                              ),
+                              child: City(name: 'Settat', side: 'Left'),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(
+                                left: 440.0,
+                                top: 200,
+                              ),
+                              child: City(name: 'Khouribga', side: 'Right'),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(
+                                left: 390.0,
+                                top: 250,
+                              ),
+                              child: City(name: 'Marrakesh', side: 'Right'),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(
+                                left: 280.0,
+                                top: 280,
+                              ),
+                              child: City(name: 'Agadir', side: 'Left'),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(
+                                left: 240.0,
+                                top: 350,
+                              ),
+                              child: City(name: 'Guelmim', side: 'Left'),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(
+                                left: 170.0,
+                                top: 410,
+                              ),
+                              child: City(name: 'Laayoune', side: 'Right'),
                             ),
                           ],
                         ),
