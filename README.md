@@ -23,23 +23,13 @@ flutter run
 This will launch the Flutter application on your local machine.
 
 ### Back-end (Spring Boot)
-1. Ensure you have Java and Maven installed. If not, follow the Java installation guide and Maven installation guide.
 
-2. Navigate to the cuckooCycleSolver_backend directory.
+1. Navigate to the cuckooCycleSolver_backend directory.
 
-3. Run the following command to build the Spring Boot application:
-
+2. Launch the server from this path
 ```bash
-mvn clean install
+CuckooCycleSolver_backend\src\main\java\com\example\CuckooCycleSolver\CuckooCycleSolverBackendApplication.java
 ```
-
-4. Run the following command to start the Spring Boot application:
-
-```bash
-java -jar target/cuckoo-cycle-solver-1.0.jar
-```
-
-Run the following commands to compile and execute the Java code:
 
 ## Usage
 Access the Flutter front-end by launching the application on the web platform.
