@@ -9,11 +9,13 @@ class City extends StatefulWidget {
     super.key,
     required this.name,
     required this.side,
+    required this.routingMode,
     required this.getXY,
     required this.resetColors,
   });
   final String name;
   final String side;
+  final bool routingMode;
   final Function(double, double) getXY;
   final Function resetColors;
 
@@ -24,12 +26,13 @@ class City extends StatefulWidget {
 class _CityState extends State<City> {
   late Color _color = Colors.blue;
   bool _cityDeparture = false;
-  bool _routeMode = false;
+  late bool _routeMode;
   late double xPosition;
   late double yPosition;
 
   @override
   void initState() {
+    _routeMode = widget.routingMode;
     super.initState();
   }
 
@@ -51,24 +54,12 @@ class _CityState extends State<City> {
                   _color = Colors.red;
                   _cityDeparture = true;
                 });
-                CityRoute.cities_route.add(widget.name);
               } else if (CityRoute.city_departure == widget.name) {
                 CityRoute.city_departure = "";
                 setState(() {
                   _color = Colors.blue;
                   _cityDeparture = false;
                 });
-                CityRoute.cities_route.remove(widget.name);
-              } else if (CityRoute.cities_route.contains(widget.name)) {
-                setState(() {
-                  _color = Colors.blue;
-                });
-                CityRoute.cities_route.remove(widget.name);
-              } else {
-                setState(() {
-                  _color = Colors.orange;
-                });
-                CityRoute.cities_route.add(widget.name);
               }
             } else {
               widget.getXY(xPosition, yPosition);

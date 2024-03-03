@@ -3,16 +3,18 @@ import 'package:flutter/material.dart';
 class LinePainter extends CustomPainter {
   final Offset circle1Center;
   final Offset circle2Center;
+  final Color color;
 
   LinePainter({
     required this.circle1Center,
     required this.circle2Center,
+    required this.color,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
-      ..color = Colors.black
+      ..color = color
       ..strokeWidth = 2
       ..strokeCap = StrokeCap.round;
 
