@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:cuckoosearchtsp/circle.dart';
 import 'package:cuckoosearchtsp/circle_painter.dart';
 import 'package:cuckoosearchtsp/city.dart';
@@ -21,6 +23,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
+      scrollBehavior: MyCustomScrollBehavior(),
       home: const MyHomePage(),
     );
   }
@@ -215,20 +218,26 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> drawRoutes() async {
     print(citiesCoordinates);
     for (var i = 0; i < CityRoute.route_taken.length - 1; i++) {
+      await Future.delayed(const Duration(milliseconds: 1000));
       setState(() {
         lines.add(CustomPaint(
           size: const Size(300, 300),
           painter: LinePainter(
-              color: Colors.purple,
+              color: Colors.red,
               circle1Center: citiesCoordinates[CityRoute.route_taken[i]]!,
               circle2Center: citiesCoordinates[CityRoute.route_taken[i + 1]]!),
         ));
       });
-      await Future.delayed(const Duration(milliseconds: 1000));
     }
   }
 
   Future<void> resetApp() async {
+    CityRoute.cities_edges.clear();
+    CityRoute.cities_selected.clear();
+    CityRoute.city_departure = "";
+    CityRoute.clickedCity = "";
+    CityRoute.route_taken.clear();
+    CityRoute.cycle_available = true;
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (BuildContext context) => const MyHomePage()),
@@ -238,289 +247,378 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width / 3,
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        width: 150,
-                        child: Image.asset(
-                          "assets/logo.png",
-                        ),
-                      ),
-                      const Text(
-                        "CuckooCycleSolver",
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 50.0),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10.0),
-                            border: Border.all(color: Colors.black),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 5,
-                                blurRadius: 7,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                            color: Colors.white,
-                          ),
+      body: Stack(
+        children: [
+          Opacity(
+            opacity: CityRoute.cycle_available ? 1 : 0.25,
+            child: AbsorbPointer(
+              absorbing: !CityRoute.cycle_available,
+              child: Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.width / 3,
                           child: Column(
                             children: [
-                              const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Text(
-                                  'Cuckoo Search Parameters',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                  ),
+                              SizedBox(
+                                width: 150,
+                                child: Image.asset(
+                                  "assets/logo.png",
                                 ),
+                              ),
+                              const Text(
+                                "CuckooCycleSolver",
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.bold),
                               ),
                               Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: ListTile(
-                                  title: const Text('Population Size'),
-                                  trailing: SizedBox(
-                                    width:
-                                        MediaQuery.of(context).size.width / 5,
-                                    child: SpinBox(
-                                      min: 1,
-                                      max: 20,
-                                      value: populationSize,
-                                      onChanged: (value) =>
-                                          populationSize = value,
-                                    ),
+                                padding: const EdgeInsets.only(top: 50.0),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    border: Border.all(color: Colors.black),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.5),
+                                        spreadRadius: 5,
+                                        blurRadius: 7,
+                                        offset: const Offset(0, 3),
+                                      ),
+                                    ],
+                                    color: Colors.white,
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      const Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Text(
+                                          'Cuckoo Search Parameters',
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                          ),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: ListTile(
+                                          title: const Text('Population Size'),
+                                          trailing: SizedBox(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width /
+                                                5,
+                                            child: SpinBox(
+                                              min: 1,
+                                              max: 20,
+                                              value: populationSize,
+                                              onChanged: (value) =>
+                                                  populationSize = value,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: ListTile(
+                                          title: const Text('Max Iterations'),
+                                          trailing: SizedBox(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width /
+                                                5,
+                                            child: SpinBox(
+                                              min: 1,
+                                              max: 2000,
+                                              value: maxIterations,
+                                              onChanged: (value) =>
+                                                  maxIterations = value,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: ListTile(
+                                          title: const Text(
+                                              'Replacement Probability'),
+                                          trailing: SizedBox(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width /
+                                                5,
+                                            child: SpinBox(
+                                              min: 1,
+                                              max: 100,
+                                              value: replacementProbability,
+                                              onChanged: (value) =>
+                                                  replacementProbability =
+                                                      value,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      if (_isLoading)
+                                        const Padding(
+                                          padding: EdgeInsets.only(
+                                              left: 5.0, right: 5),
+                                          child: LinearProgressIndicator(),
+                                        ),
+                                    ],
                                   ),
                                 ),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: ListTile(
-                                  title: const Text('Max Iterations'),
-                                  trailing: SizedBox(
-                                    width:
-                                        MediaQuery.of(context).size.width / 5,
-                                    child: SpinBox(
-                                      min: 1,
-                                      max: 2000,
-                                      value: maxIterations,
-                                      onChanged: (value) =>
-                                          maxIterations = value,
-                                    ),
-                                  ),
+                              if (!showSolution)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 50.0),
+                                  child: ElevatedButton(
+                                      onPressed: () async {
+                                        if (buttonText ==
+                                            "Set Departing City") {
+                                          setState(() {
+                                            _routingMode = true;
+                                            cityWidgets.clear();
+                                          });
+                                          await Future.delayed(
+                                              const Duration(microseconds: 1));
+                                          setState(() {
+                                            createCityWidgets();
+                                            buttonText = "Solve";
+                                          });
+                                        } else if (buttonText == "Solve") {
+                                          setState(() {
+                                            _isLoading = true;
+                                          });
+                                          //await CityRoute.testAPI();
+                                          await CityRoute.sendGraph(
+                                            populationSize,
+                                            maxIterations,
+                                            replacementProbability,
+                                          );
+                                          setState(() {
+                                            cityWidgets.clear();
+                                          });
+                                          await Future.delayed(
+                                              const Duration(microseconds: 1));
+                                          setState(() {
+                                            CityRoute.city_departure = "";
+                                            _isLoading = false;
+                                            //lines.clear();
+                                            showSolution = true;
+                                            createCityWidgets();
+                                          });
+                                          await drawRoutes();
+                                        }
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Text(
+                                          buttonText,
+                                          style: const TextStyle(fontSize: 25),
+                                        ),
+                                      )),
                                 ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: ListTile(
-                                  title: const Text('Replacement Probability'),
-                                  trailing: SizedBox(
-                                    width:
-                                        MediaQuery.of(context).size.width / 5,
-                                    child: SpinBox(
-                                      min: 1,
-                                      max: 100,
-                                      value: replacementProbability,
-                                      onChanged: (value) =>
-                                          replacementProbability = value,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              if (_isLoading)
-                                const Padding(
-                                  padding: EdgeInsets.only(left: 5.0, right: 5),
-                                  child: LinearProgressIndicator(),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      if (!showSolution)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 50.0),
-                          child: ElevatedButton(
-                              onPressed: () async {
-                                if (buttonText == "Set Departing City") {
-                                  setState(() {
-                                    _routingMode = true;
-                                    cityWidgets.clear();
-                                  });
-                                  await Future.delayed(
-                                      const Duration(microseconds: 1));
-                                  setState(() {
-                                    createCityWidgets();
-                                    buttonText = "Solve";
-                                  });
-                                } else if (buttonText == "Solve") {
-                                  setState(() {
-                                    _isLoading = true;
-                                  });
-                                  await CityRoute.sendGraph(
-                                    populationSize,
-                                    maxIterations,
-                                    replacementProbability,
-                                  );
-                                  setState(() {
-                                    cityWidgets.clear();
-                                  });
-                                  await Future.delayed(
-                                      const Duration(microseconds: 1));
-                                  setState(() {
-                                    CityRoute.city_departure = "";
-                                    _isLoading = false;
-                                    lines.clear();
-                                    showSolution = true;
-                                    createCityWidgets();
-                                  });
-                                  await drawRoutes();
-                                }
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  buttonText,
-                                  style: const TextStyle(fontSize: 25),
-                                ),
-                              )),
-                        ),
-                      if (showSolution)
-                        Expanded(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              for (var i = 0;
-                                  i < CityRoute.route_taken.length;
-                                  i++)
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Column(
+                              if (showSolution)
+                                Expanded(
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       crossAxisAlignment:
                                           CrossAxisAlignment.center,
                                       children: [
-                                        Stack(
-                                          children: [
-                                            Transform.translate(
-                                              offset: i == 0
-                                                  ? const Offset(0, 5)
-                                                  : const Offset(0, 0),
-                                              child: MyCircle(
-                                                color: i !=
-                                                        CityRoute.route_taken
-                                                                .length -
-                                                            1
-                                                    ? Colors.blue
-                                                    : Colors.red,
-                                                getXY: (p0, p1) {},
+                                        for (var i = 0;
+                                            i < CityRoute.route_taken.length;
+                                            i++)
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                children: [
+                                                  Stack(
+                                                    children: [
+                                                      Transform.translate(
+                                                        offset: i == 0
+                                                            ? const Offset(0, 5)
+                                                            : const Offset(
+                                                                0, 0),
+                                                        child: MyCircle(
+                                                          color: i !=
+                                                                  CityRoute
+                                                                          .route_taken
+                                                                          .length -
+                                                                      1
+                                                              ? Colors.blue
+                                                              : Colors.red,
+                                                          getXY: (p0, p1) {},
+                                                        ),
+                                                      ),
+                                                      if (i == 0)
+                                                        Transform.translate(
+                                                          offset: const Offset(
+                                                              0, -15),
+                                                          child: const Icon(
+                                                            Icons.flag,
+                                                            color: Colors.green,
+                                                          ),
+                                                        ),
+                                                    ],
+                                                  ),
+                                                  Text(
+                                                      CityRoute.route_taken[i]),
+                                                ],
                                               ),
-                                            ),
-                                            if (i == 0)
-                                              Transform.translate(
-                                                offset: const Offset(0, -15),
-                                                child: const Icon(
-                                                  Icons.flag,
-                                                  color: Colors.green,
+                                              if (i !=
+                                                  CityRoute.route_taken.length -
+                                                      1)
+                                                const Padding(
+                                                  padding: EdgeInsets.all(8.0),
+                                                  child: Icon(Icons
+                                                      .arrow_forward_sharp),
                                                 ),
-                                              ),
-                                          ],
-                                        ),
-                                        Text(CityRoute.route_taken[i]),
+                                            ],
+                                          ),
                                       ],
                                     ),
-                                    if (i != CityRoute.route_taken.length - 1)
-                                      const Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: Icon(Icons.arrow_forward_sharp),
-                                      ),
-                                  ],
-                                ),
+                                  ),
+                                )
                             ],
                           ),
-                        )
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(15.0),
-                  child: Container(
-                    width: 700,
-                    height: 610,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10.0),
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 5,
-                          blurRadius: 7,
-                          offset: const Offset(0, 3),
                         ),
-                      ],
+                      ),
                     ),
-                    child: Stack(
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Align(
-                          alignment: Alignment.center,
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 30.0),
-                            child: ClipRRect(
+                        Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Container(
+                            width: 700,
+                            height: 610,
+                            decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10.0),
-                              child: Image.asset(
-                                'assets/map.png',
-                                scale: 3.7,
-                                fit: BoxFit.none,
-                              ),
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  spreadRadius: 5,
+                                  blurRadius: 7,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Stack(
+                              children: [
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 30.0),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                      child: Image.asset(
+                                        'assets/map.png',
+                                        scale: 3.7,
+                                        fit: BoxFit.none,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Stack(
+                                  children: cityWidgets,
+                                ),
+                                Stack(
+                                  children: lines,
+                                ),
+                                Align(
+                                  alignment: Alignment.bottomRight,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: ElevatedButton(
+                                        onPressed: () async {
+                                          await resetApp();
+                                        },
+                                        child: const Text('Reset')),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                        Stack(
-                          children: cityWidgets,
-                        ),
-                        Stack(
-                          children: lines,
-                        ),
-                        Align(
-                          alignment: Alignment.bottomRight,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: ElevatedButton(
-                                onPressed: () async {
-                                  await resetApp();
-                                },
-                                child: const Text('Reset')),
-                          ),
-                        ),
                       ],
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ],
-        ),
+          ),
+          if (!CityRoute.cycle_available)
+            Center(
+              child: Container(
+                width: 500,
+                height: 500,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(color: Colors.black),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 5,
+                      blurRadius: 7,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                  color: Colors.white,
+                ),
+                child: Column(
+                  children: [
+                    Flexible(child: Image.asset('assets/logo.png')),
+                    const Padding(
+                      padding: EdgeInsets.all(15.0),
+                      child: Text(
+                        'No Cycle was found!',
+                        style: TextStyle(
+                            color: Colors.red,
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: ElevatedButton(
+                          onPressed: resetApp,
+                          child: const Text(
+                            'Reset',
+                            style: TextStyle(fontSize: 20),
+                          )),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
+}
+
+class MyCustomScrollBehavior extends MaterialScrollBehavior {
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.stylus,
+        PointerDeviceKind.unknown,
+      };
 }
